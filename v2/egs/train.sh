@@ -31,5 +31,5 @@ train_unet.py \
 --optimizer 'Adam' \
 --lr 0.001 \
 --weight_decay 0 \
---epochs ${epochs} \
+--epochs $epochs \
 --model_dir "${out_dir}/UNet_S${S}_C${C}_H${H}_heatmap${heatmap}_depth${depth}"
