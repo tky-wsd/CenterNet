@@ -2,8 +2,7 @@
 
 DATA_DIR=$1
 out_dir=$2
-
-echo ${DATA_DIR}
+epochs=$3
 
 . ./path.sh
 
@@ -32,5 +31,5 @@ train_unet.py \
 --optimizer 'Adam' \
 --lr 0.001 \
 --weight_decay 0 \
---epochs 5 \
+--epochs ${epochs} \
 --model_dir "${out_dir}/UNet_S${S}_C${C}_H${H}_heatmap${heatmap}_depth${depth}"
