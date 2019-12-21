@@ -18,9 +18,11 @@ local_offset=0.0
 depth=0.0
 
 if [ -z ${continue_from} ]; then
-    model_option="--model_dir ${out_dir}/UNet_S${S}_C${C}_H${H}_heatmap${heatmap}_local_offset${local_offset}_depth${depth}"
+    argument=model_dir
+    model_option=${out_dir}/UNet_S${S}_C${C}_H${H}_heatmap${heatmap}_local_offset${local_offset}_depth${depth}
 else
-    model_option="--continue_from ${continue_from}"
+    argument=continue_from
+    model_option=${continue_from}
 fi
 
 train_unet.py \
@@ -41,4 +43,4 @@ train_unet.py \
 --lr 0.001 \
 --weight_decay 0 \
 --epochs $epochs \
-${model_option}
+--${argument} "${model_option}"
