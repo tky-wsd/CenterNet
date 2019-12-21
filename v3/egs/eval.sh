@@ -14,10 +14,11 @@ S=1
 C=[64,128,128,256,256,512]
 H=256
 heatmap=1.0
+local_offset=0.0
 depth=0.0
 
 model_dir="${out_dir}/UNet_S${S}_C${C}_H${H}_heatmap${heatmap}_local_offset${local_offset}_depth${depth}"
-model_path="${model_dir}/model_${end_epoch}.pth"
+model_path="${model_dir}/epoch${end_epoch}.pth"
 out_image_dir="${model_dir}/images"
 
 eval_unet.py \
