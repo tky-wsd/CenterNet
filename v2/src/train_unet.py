@@ -51,7 +51,7 @@ def main(args):
         [0, 0, 1]
     ])
     
-    dataset = Dataset(csv_path=args.train_csv_path, image_dir=args.train_image_dir, R=R, camera_matrix=camera_matrix)
+    dataset = TrainDataset(csv_path=args.train_csv_path, image_dir=args.train_image_dir, R=R, camera_matrix=camera_matrix)
     data_loader = {}
     train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
     data_loader['train'] = train_loader
