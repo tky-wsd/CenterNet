@@ -3,6 +3,8 @@
 DATA_DIR=$1
 out_dir=$2
 
+echo ${DATA_DIR}
+
 . ./path.sh
 
 train_csv_path="${DATA_DIR}/train.csv"
