@@ -76,9 +76,10 @@ def main(args):
     if torch.cuda.is_available():
         model = torch.nn.DataParallel(model)
         model.cuda()
-    
-    model.load_state_dict(torch.load(args.model_path))
         
+    package = torch.load(args.model_path)
+    model.load_state_dict(package['state_dict'])
+    
     evaluater = Evaluater(data_loader, model, head_list, args)
         
     evaluater.eval()
