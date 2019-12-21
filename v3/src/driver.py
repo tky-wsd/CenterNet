@@ -15,7 +15,7 @@ class Trainer(object):
         
         self.epochs = args.epochs
         
-        if args.continue_from is None:
+        if args.continue_from is not None:
             self.model_dir = os.path.dirname(args.continue_from)
             package = torch.load(args.continue_from)
             self.model.load_state_dict(package['state_dict'])
