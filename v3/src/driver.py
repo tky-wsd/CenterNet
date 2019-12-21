@@ -20,6 +20,7 @@ class Trainer(object):
             package = torch.load(args.continue_from)
             self.model.load_state_dict(package['state_dict'])
             self.start_epoch = package['epoch']
+            self.optimizer.load_state_dict(['optim_dict'])
         else:
             self.continue_from = None
             self.model_dir = args.model_dir
@@ -54,7 +55,7 @@ class Trainer(object):
                 
             os.makedirs(self.model_dir, exist_ok=True)
             model_path = os.path.join(self.model_dir, "model_{}.pth".format(epoch+1))
-            package = {'state_dict': self.model.state_dict(), 'epoch': epoch+1}
+            package = {'state_dict': self.model.state_dict(), 'optim_dict': self.optimizer.state_dict(), 'epoch': epoch+1}
             torch.save(package, model_path)
     
     
