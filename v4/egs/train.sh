@@ -29,6 +29,7 @@ fi
 
 train_unet.py \
 --train_csv_path ${train_csv_path} \
+--valid_csv_path ${valid_csv_path} \
 --train_image_dir ${train_image_dir} \
 --f_x 2304.5479 \
 --f_y 2305.8757 \
