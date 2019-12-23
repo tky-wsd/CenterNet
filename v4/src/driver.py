@@ -112,6 +112,8 @@ class Trainer(object):
                 print("({}): {}, ".format(head, avg_domain_loss))
                 
                 avg_loss = avg_loss + self.lambdas[head] * avg_domain_loss
+            
+            print("")
                 
             return avg_loss
 
