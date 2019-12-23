@@ -23,8 +23,8 @@ def main(args):
     n_total = len(original_data_frame)
     n_valid = int(args.split * n_total)
     
-    train_data_frame = original_data_frame[:n_valid]
-    valid_data_frame = original_data_frame[n_valid:]
+    valid_data_frame = original_data_frame[:n_valid]
+    train_data_frame = original_data_frame[n_valid:]
     
     print("train: {}".format(len(train_data_frame)))
     print("valid: {}".format(len(valid_data_frame)))
