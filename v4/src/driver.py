@@ -29,13 +29,11 @@ class Trainer(object):
             self.start_epoch = 0
     
     def train(self):
-        head_list = self.head_list
-        
         os.makedirs(self.model_dir, exist_ok=True)
         
         for epoch in range(self.start_epoch, self.epochs):
-            avg_train_loss = self.run_one_epoch_train(self, epoch)
-            avg_valid_loss = self.run_one_epoch_valid(self, epoch)
+            avg_train_loss = self.run_one_epoch_train(epoch)
+            avg_valid_loss = self.run_one_epoch_valid(epoch)
             
             print("[Epoch {}] loss (train): {}, loss (valid): {}".format(epoch, avg_train_loss, avg_valid_loss))
             
@@ -44,6 +42,8 @@ class Trainer(object):
             torch.save(package, model_path)
     
     def run_one_epoch_train(self, epoch):
+        head_list = self.head_list
+        
         self.model.train()
         
         total_loss = 0
@@ -81,6 +81,8 @@ class Trainer(object):
         return total_loss / len(self.train_loader)
         
     def run_one_epoch_valid(self, epoch):
+        head_list = self.head_list
+    
         self.model.eval()
         
         with torch.no_grad():
