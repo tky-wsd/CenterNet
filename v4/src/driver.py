@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 class Trainer(object):
     def __init__(self, data_loader, model, optimizer, head_list, criterions, lambdas, args):
         self.train_loader = data_loader['train']
+        self.valid_loader = data_loader['valid']
+        
         self.model = model
         self.optimizer = optimizer
         
@@ -29,9 +31,63 @@ class Trainer(object):
     def train(self):
         head_list = self.head_list
         
+        os.makedirs(self.model_dir, exist_ok=True)
+        
         for epoch in range(self.start_epoch, self.epochs):
-            for iteration, (train_images, target) in enumerate(self.train_loader):
-                outputs = self.model(train_images)
+            avg_train_loss = self.run_one_epoch_train(self, epoch)
+            avg_valid_loss = self.run_one_epoch_valid(self, epoch)
+            
+            print("[Epoch {}] loss (train): {}, loss (valid): {}".format(epoch, avg_train_loss, avg_valid_loss))
+            
+            model_path = os.path.join(self.model_dir, "epoch{}.pth".format(epoch+1))
+            package = {'state_dict': self.model.state_dict(), 'optim_dict': self.optimizer.state_dict(), 'epoch': epoch+1}
+            torch.save(package, model_path)
+    
+    def run_one_epoch_train(self, epoch):
+        self.model.train()
+        
+        total_loss = 0
+        
+        for iteration, (train_images, target) in enumerate(self.train_loader):
+            outputs = self.model(train_images)
+            
+            estimated_output = {head: None for (head, num_in_features, head_module) in head_list}
+            
+            for output in outputs:
+                for head in output.keys():
+                    if estimated_output[head] is None:
+                        estimated_output[head] = output[head].unsqueeze(dim=0)
+                    else:
+                        estimated_output[head] = torch.cat((estimated_output[head], output[head].unsqueeze(dim=0)), dim=0)
+            
+            loss = 0
+            domain_loss = {}
+
+            print("[Epoch {}] iteration {}/{}, ".format(epoch+1, iteration+1, len(self.train_loader)), end='')
+            
+            for (head, num_out_features, head_module) in head_list:
+                domain_loss[head] = self.criterions[head](estimated_output[head], target[head], target['pointmap'], target['num_object'])
+                print("({}): {}, ".format(head, domain_loss[head].item()), end='')
+                loss = loss + self.lambdas[head] * domain_loss[head]
+
+            print("loss: {}".format(loss.item()))
+            
+            total_loss = total_loss + loss.detach().clone().cpu()
+            
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+        
+        return total_loss / len(self.train_loader)
+        
+    def run_one_epoch_valid(self, epoch):
+        self.model.eval()
+        
+        with torch.no_grad():
+            total_loss = 0
+        
+            for iteration, (valid_images, target) in enumerate(self.valid_loader):
+                outputs = self.model(valid_images)
                 
                 estimated_output = {head: None for (head, num_in_features, head_module) in head_list}
                 
@@ -46,18 +102,10 @@ class Trainer(object):
 
                 for (head, num_out_features, head_module) in head_list:
                     loss = loss + self.lambdas[head] * self.criterions[head](estimated_output[head], target[head], target['pointmap'], target['num_object'])
-
-                print("[Epoch {}] iteration {}/{}, loss: {}".format(epoch+1, iteration+1, len(self.train_loader), loss.item()))
                 
-                self.optimizer.zero_grad()
-                loss.backward()
-                self.optimizer.step()
-                
-            os.makedirs(self.model_dir, exist_ok=True)
-            model_path = os.path.join(self.model_dir, "epoch{}.pth".format(epoch+1))
-            package = {'state_dict': self.model.state_dict(), 'optim_dict': self.optimizer.state_dict(), 'epoch': epoch+1}
-            torch.save(package, model_path)
-    
+                total_loss = total_loss + loss.detach().clone().cpu()
+        
+        return total_loss / len(self.valid_loader)
     
 class Evaluater(object):
     def __init__(self, data_loader, model, head_list, args):

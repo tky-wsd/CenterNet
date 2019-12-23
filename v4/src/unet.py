@@ -50,8 +50,6 @@ class UNet(nn.Module):
         self.bottleneck_conv2d_intermediate = nn.ModuleList(bottleneck_conv2d_intermediate)
         self.head_net = nn.ModuleList(head_net)
         
-        # self.head_net =
-        
     def forward(self, input):
         residual = input
         x, skips = self.encoder(input)
@@ -75,7 +73,8 @@ class UNet(nn.Module):
             output_intermediate[head] = self.head_net[idx](x_intermediate)
     
         return output, output_intermediate
-        
+
+
 class Encoder(nn.Module):
     def __init__(self, channel_list):
         super(Encoder, self).__init__()
@@ -102,7 +101,8 @@ class Encoder(nn.Module):
         output = x
         
         return output, skips
-        
+
+
 class Decoder(nn.Module):
     def __init__(self, channel_list):
         super(Decoder, self).__init__()
@@ -132,6 +132,7 @@ class Decoder(nn.Module):
         output = x
         
         return output
+
         
 class EncoderBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -150,7 +151,8 @@ class EncoderBlock(nn.Module):
         output = self.relu(x)
         
         return output
-        
+
+
 class DecoderBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super(DecoderBlock, self).__init__()

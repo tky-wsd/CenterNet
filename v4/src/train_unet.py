@@ -18,6 +18,7 @@ EPS=1e-8
 parser = argparse.ArgumentParser("U-Net")
 
 parser.add_argument('--train_csv_path', type=str, default=None, help='Path for train.csv')
+parser.add_argument('--valid_csv_path', type=str, default=None, help='Path for valid.csv')
 parser.add_argument('--train_image_dir', type=str, default=None, help='Root directory for train images')
 parser.add_argument('--f_x', type=float, default=None, help='Focus of camera')
 parser.add_argument('--f_y', type=float, default=None, help='Focus of camera')
@@ -51,11 +52,14 @@ def main(args):
         [0, 0, 1]
     ])
     
-    dataset = TrainDataset(csv_path=args.train_csv_path, image_dir=args.train_image_dir, R=R, camera_matrix=camera_matrix)
+    train_dataset = TrainDataset(csv_path=args.train_csv_path, image_dir=args.train_image_dir, R=R, camera_matrix=camera_matrix)
+    train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True)
+    valid_dataset = TrainDataset(csv_path=args.valid_csv_path, image_dir=args.train_image_dir, R=R, camera_matrix=camera_matrix)
+    valid_loader = torch.utils.data.DataLoader(valid_dataset, batch_size=1, shuffle=False)
+    
     data_loader = {}
-    train_loader = torch.utils.data.DataLoader(dataset, batch_size=args.batch_size, shuffle=True)
     data_loader['train'] = train_loader
-    # data_loader['valid'] = valid_loader
+    data_loader['valid'] = valid_loader
     
     head_list = []
     lambdas = {}
