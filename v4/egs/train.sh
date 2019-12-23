@@ -11,7 +11,7 @@ train_csv_path="${DATA_DIR}/train.csv"
 train_image_dir="${DATA_DIR}/train_images"
 
 S=1
-C=[64,64,128,128,256,256]
+C=[64,64,128,128,128,256]
 H=256
 heatmap=1.0
 local_offset=0.0

@@ -11,7 +11,7 @@ test_image_dir="${DATA_DIR}/test_images"
 
 # Network configuration
 S=1
-C=[64,64,128,128,256,256]
+C=[64,64,128,128,128,256]
 H=256
 heatmap=1.0
 local_offset=0.0
