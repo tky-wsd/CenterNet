@@ -18,7 +18,7 @@ def main(args):
     valid_csv_path = args.valid_csv_path
     
     original_data_frame = pd.read_csv(original_csv_path)
-    original_data_frame = original_data_frame.sample(frac=1).reset_index(drop=True)
+    original_data_frame = original_data_frame.sample(frac=1, random_state=0).reset_index(drop=True)
     
     n_total = len(original_data_frame)
     n_valid = int(args.split * n_total)
