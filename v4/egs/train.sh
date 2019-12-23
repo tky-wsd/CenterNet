@@ -8,6 +8,7 @@ continue_from=$4
 . ./path.sh
 
 train_csv_path="${DATA_DIR}/train.csv"
+valid_csv_path="${DATA_DIR}/valid.csv"
 train_image_dir="${DATA_DIR}/train_images"
 
 S=1
