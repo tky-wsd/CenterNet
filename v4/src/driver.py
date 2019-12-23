@@ -86,7 +86,7 @@ class Trainer(object):
         self.model.eval()
         
         with torch.no_grad():
-            total_loss = 0
+            domain_loss = {head: 0 for head in head_list}
         
             for iteration, (valid_images, target) in enumerate(self.valid_loader):
                 outputs = self.model(valid_images)
@@ -99,16 +99,22 @@ class Trainer(object):
                             estimated_output[head] = output[head].unsqueeze(dim=0)
                         else:
                             estimated_output[head] = torch.cat((estimated_output[head], output[head].unsqueeze(dim=0)), dim=0)
-                
-                loss = 0
 
                 for (head, num_out_features, head_module) in head_list:
-                    loss = loss + self.lambdas[head] * self.criterions[head](estimated_output[head], target[head], target['pointmap'], target['num_object'])
-                
-                total_loss = total_loss + loss.detach().clone().cpu()
+                    domain_loss[head] = domain_loss[head] + self.criterions[head](estimated_output[head], target[head], target['pointmap'], target['num_object'])
         
-        return total_loss / len(self.valid_loader)
-    
+            avg_loss = 0
+            
+            print("[Epoch {} valid] ".format(epoch+1), end='')
+            
+            for (head, num_out_features, head_module) in head_list:
+                avg_domain_loss = domain_loss[head] / len(self.valid_loader)
+                print("({}): {}, ".format(head, avg_domain_loss))
+                
+                avg_loss = avg_loss + self.lambdas[head] * avg_domain_loss
+                
+            return avg_loss
+
 class Evaluater(object):
     def __init__(self, data_loader, model, head_list, args):
         self.train_loader = data_loader['test']
