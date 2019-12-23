@@ -15,7 +15,7 @@ C=[64,64,128,128,256,256]
 H=256
 heatmap=1.0
 local_offset=0.0
-depth=0.1
+depth=0.0
 batch_size=4
 
 if [ -z ${continue_from} ]; then
