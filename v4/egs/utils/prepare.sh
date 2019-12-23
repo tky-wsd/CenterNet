@@ -1,5 +1,7 @@
 #!/bin/bash
 
+. ./path.sh
+
 original_train_path="$1"
 train_csv_path="$2"
 valid_csv_path="$3"
