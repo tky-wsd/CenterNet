@@ -86,7 +86,7 @@ class Trainer(object):
         self.model.eval()
         
         with torch.no_grad():
-            domain_loss = {head: 0 for head in head_list}
+            domain_loss = {head: 0 for (head, num_in_features, head_module) in head_list}
         
             for iteration, (valid_images, target) in enumerate(self.valid_loader):
                 outputs = self.model(valid_images)
