@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser("Make Peking university autonomous driving data
 parser.add_argument('--original_csv_path', type=str, default=None, help='Path for ORIGINAL train.csv')
 parser.add_argument('--train_csv_path', type=str, default=None, help='Path for train.csv')
 parser.add_argument('--valid_csv_path', type=str, default=None, help='Path for train.csv')
-parser.add_argument('--split', type=float, default=0.1, help='Ratio for splitting, 0.1 means 10% of ORIGINAL train data is used for validatin')
+parser.add_argument('--split', type=float, default=0.05, help='Ratio for splitting, 0.05 means 5% of ORIGINAL train data is used for validatin')
 
 def main(args):
     original_csv_path = args.original_csv_path
