@@ -35,7 +35,7 @@ class Trainer(object):
             avg_train_loss = self.run_one_epoch_train(epoch)
             avg_valid_loss = self.run_one_epoch_valid(epoch)
             
-            print("[Epoch {}] loss (train): {}, loss (valid): {}".format(epoch, avg_train_loss, avg_valid_loss))
+            print("[Epoch {}] loss (train): {}, loss (valid): {}".format(epoch+1, avg_train_loss, avg_valid_loss))
             
             model_path = os.path.join(self.model_dir, "epoch{}.pth".format(epoch+1))
             package = {'state_dict': self.model.state_dict(), 'optim_dict': self.optimizer.state_dict(), 'epoch': epoch+1}
@@ -109,7 +109,7 @@ class Trainer(object):
             
             for (head, num_out_features, head_module) in head_list:
                 avg_domain_loss = domain_loss[head] / len(self.valid_loader)
-                print("({}): {}, ".format(head, avg_domain_loss))
+                print("({}): {}, ".format(head, avg_domain_loss), end='')
                 
                 avg_loss = avg_loss + self.lambdas[head] * avg_domain_loss
             
