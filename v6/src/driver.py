@@ -139,6 +139,7 @@ class Evaluater(object):
         self.head_list = head_list
         self.inv_camera_matrix = get_inv_camera_matrix(args.camera_matrix)
         
+        self.out_csv_path = args.out_csv_path
         self.data_frame = pd.DataFrame(columns=['ImageId', 'PredictionString'])
         
         self.out_image_dir = args.out_image_dir
@@ -204,4 +205,6 @@ class Evaluater(object):
                     data = pd.DataFrame([(image_id[batch_id], prediction_string)], columns=['ImageId', 'PredictionString'])
                     self.data_frame = self.data_frame.append(data)
                         
-                return
+                break
+            
+            self.data_frame.to_csv(self.out_csv_path)

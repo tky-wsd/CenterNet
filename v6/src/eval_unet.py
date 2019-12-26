@@ -17,6 +17,7 @@ EPS=1e-8
 parser = argparse.ArgumentParser("U-Net")
 
 parser.add_argument('--test_csv_path', type=str, default=None, help='Path for test.csv')
+parser.add_argument('--out_csv_path', type=str, default=None, help='Path for OUTPUT test.csv')
 parser.add_argument('--test_image_dir', type=str, default=None, help='Root directory for test images')
 parser.add_argument('--f_x', type=float, default=None, help='Focus of camera')
 parser.add_argument('--f_y', type=float, default=None, help='Focus of camera')

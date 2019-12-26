@@ -100,16 +100,14 @@ class TestDataset(torch.utils.data.Dataset):
         
         self.data = []
         
-        self.image_id_list = [os.path.splitext(os.path.basename(path))[0] for path in glob.glob(os.path.join(image_dir, "*.jpg"))]
+        data_frame = pd.read_csv(csv_path)
+        self.image_id_list = [image_id for image_id in data_frame['ImageId']]
         
-        self.csv_path = csv_path
         self.image_dir = image_dir
         self.R = R
         self.camera_matrix = camera_matrix
             
     def __getitem__(self, idx):
-        R = self.R
-        
         image_id = self.image_id_list[idx]
     
         image_path = os.path.join(self.image_dir, image_id + '.jpg')
