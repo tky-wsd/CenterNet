@@ -167,6 +167,7 @@ class Evaluater(object):
 
                 for batch_id in range(batch_size):
                     keypoint_list = []
+                    prediction_string = []
                     
                     heatmap = estimated_output['heatmap'][-1][batch_id, 0].clone().cpu()
                     heatmap_path = os.path.join(self.out_image_dir, image_id[batch_id] + '_heatmap.png')
