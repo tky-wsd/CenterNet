@@ -198,8 +198,7 @@ class Evaluater(object):
                         prediction = (0.18, 0.0, 3.14159, camera_coords[0], camera_coords[1], camera_coords[2], confidence) # yaw, pitch, roll, x, y, z,confidence
                         prediction_string.append(prediction)
                         
-                    prediction_string = [str(prediction) for prediction in prediction_string]
-                    prediction_string = prediction_string.replace('(', '').replace(')', '').replace(',', '')
+                    prediction_string = [str(prediction).replace('(', '').replace(')', '').replace(',', '') for prediction in prediction_string]
                     prediction_string = ' '.join(prediction_string)
                             
                     data = pd.DataFrame([(image_id[batch_id], prediction_string)], columns=['ImageId', 'PredictionString'])
