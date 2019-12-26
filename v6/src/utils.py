@@ -103,3 +103,11 @@ def is_higher_than_around(map_3x3):
     return True
         
                 
+def get_inv_camera_matrix(camera_matrix):
+    inv_camera_matrix = np.eye(3)
+    inv_camera_matrix[0,0] = 1.0 / camera_matrix[0,0]
+    inv_camera_matrix[1,1] = 1.0 / camera_matrix[1,1]
+    inv_camera_matrix[0,2]  = - camera_matrix[0,2] / camera_matrix[0,0]
+    inv_camera_matrix[1,2]  = - camera_matrix[1,2] / camera_matrix[1,1]
+    
+    return inv_camera_matrix
