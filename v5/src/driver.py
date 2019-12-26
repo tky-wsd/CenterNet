@@ -159,7 +159,7 @@ class Evaluater(object):
                             show_heatmap(heatmap, save_path=heatmap_path)
                             print("heatmap.max(): {}".format(heatmap.max()))
                             
-                            keypoint_map = get_keypoints(heatmap, threshold=0.1)
+                            keypoint_map = get_keypoints(heatmap, threshold=0.25)
                             print("Number of key-point: {}".format(keypoint_map.sum()))
                             keypoint_map_path = os.path.join(self.out_image_dir, image_id[batch_id] + '_keypoint.png')
                             show_heatmap(keypoint_map, save_path=keypoint_map_path)
