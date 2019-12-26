@@ -1,5 +1,6 @@
 import math
 import numpy as np
+import matplotlib.pyplot as plt
 
 def from_prediction_string_to_world_coords(prediction_string):
     """
@@ -30,6 +31,27 @@ def from_camera_coords_to_image_coords(camera_coords, camera_matrix):
     image_coords[:, 1] =  image_coords[:, 1] / image_coords[:, 2]
 
     return image_coords
+    
+def show_heatmap(heatmap, save_path=None):
+    """
+    Args:
+        heatmap (H//R, W//R)
+        image (H, W)
+    
+    """
+    plt.figure()
+    plt.imshow(heatmap)
+    
+    if save_path is not None:
+        plt.savefig(save_path)
+            
+def show_image(image, save_path=None):
+    plt.figure()
+    image = ((image+1)/2*255).int()
+    plt.imshow(image)
+    
+    if save_path is not None:
+        plt.savefig(save_path)
 
 def get_front_or_back(angle):
     """
@@ -44,3 +66,40 @@ def get_front_or_back(angle):
         is_front = 0
     return is_front
         
+def get_keypoints(heatmap, threshold=0.6):
+    """
+    Args:
+        heatmap (H//R, W//R):
+        
+    """
+    if threshold < 0.5:
+        raise ValueError("Parametes threshold must be grater than 0.5.")
+    H, W = heatmap.size()
+    
+    mask = heatmap // threshold
+    heatmap = mask * heatmap
+    
+    estimated_key_point = np.zeros((H, W))
+    
+    for p_h in range(1, H-1):
+        for p_w in range(1, W-1):
+            if mask[p_h, p_w] > 0.0:
+                if is_higher_than_around(heatmap[p_h-1: p_h+2, p_w-1: p_w+2]):
+                    estimated_key_point[p_h, p_w] = 1.0
+                    
+    return estimated_key_point
+                    
+def is_higher_than_around(map_3x3):
+    """
+    Args:
+        map_3x3 (3, 3)
+    """
+    
+    for row in range(3):
+        for column in range(3):
+            if map_3x3[2, 2] < map_3x3[row, column]:
+                return False
+                
+    return True
+        
+                

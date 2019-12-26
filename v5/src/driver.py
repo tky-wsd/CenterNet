@@ -1,7 +1,10 @@
 import os
+import pandas as pd
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
+
+from utils import show_heatmap, show_image, get_keypoints
 
 class Trainer(object):
     def __init__(self, data_loader, model, optimizer, head_list, criterions, lambdas, args):
@@ -119,23 +122,24 @@ class Trainer(object):
 
 class Evaluater(object):
     def __init__(self, data_loader, model, head_list, args):
-        self.train_loader = data_loader['test']
+        self.data_loader = data_loader['test']
         self.model = model
         
         self.head_list = head_list
         
-        self.out_image_dir = args.out_image_dir
+        self.data_frame = pd.DataFrame(columns=['ImageId', 'PredictionString'])
         
+        self.out_image_dir = args.out_image_dir
         os.makedirs(self.out_image_dir, exist_ok=True)
         
     def eval(self):
-        batch_size = self.train_loader.batch_size
+        batch_size = self.data_loader.batch_size
         head_list = self.head_list
         
         self.model.eval()
         
         with torch.no_grad():
-            for iteration, (test_images, image_id) in enumerate(self.train_loader):
+            for iteration, (test_images, image_id) in enumerate(self.data_loader):
                 outputs = self.model(test_images)
                 
                 estimated_output = {head: None for (head, num_in_features, head_module) in head_list}
@@ -150,17 +154,19 @@ class Evaluater(object):
                 for (head, num_out_features, head_module) in head_list:
                     for batch_id in range(batch_size):
                         if head == 'heatmap':
-                            plt.figure()
-                            plt.imshow(estimated_output[head][-1][batch_id, 0].clone().cpu())
-                            # (['heatmap'][stack_id][batch_id, num_channels])
-                            save_path = os.path.join(self.out_image_dir, image_id[batch_id] + '_heatmap.png')
-                            plt.savefig(save_path)
+                            heatmap = estimated_output[head][-1][batch_id, 0].clone().cpu()
+                            heatmap_path = os.path.join(self.out_image_dir, image_id[batch_id] + '_heatmap.png')
+                            show_heatmap(heatmap, save_path=heatmap_path)
                             
-                            plt.figure()
+                            keypoint_map = get_keypoints(heatmap)
+                            keypoint_map_path = os.path.join(self.out_image_dir, image_id[batch_id] + '_keypoint.png')
+                            show_heatmap(keypoint_map, save_path=keypoint_map_path)
+                            
                             test_image = test_images[batch_id].clone().cpu().permute(1, 2, 0)
-                            test_image = ((test_image+1)/2*255).int()
-                            plt.imshow(test_image)
-                            save_path = os.path.join(self.out_image_dir, image_id[batch_id] + '.png')
-                            plt.savefig(save_path)
+                            image_path = save_path = os.path.join(self.out_image_dir, image_id[batch_id] + '.png')
+                            show_image(test_image, save_path=image_path)
+                            
+                # data = pd.DataFrame([(image_id, prediction_string)], columns=['ImageId', 'PredictionString'])
+                # self.data_frame = self.data_frame.append((image_id, prediction_string))
                         
                 return

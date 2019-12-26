@@ -77,7 +77,6 @@ class TrainDataset(torch.utils.data.Dataset):
                 target_heatmap = heatmap.unsqueeze(dim=0)
             else:
                 target_heatmap = torch.cat((target_heatmap, heatmap.unsqueeze(dim=0)), dim=0)
-                
 
         target_heatmap, _ = torch.max(target_heatmap, dim=0)
         
@@ -99,11 +98,7 @@ class TestDataset(torch.utils.data.Dataset):
         
         self.data = []
         
-        data = [os.path.splitext(os.path.basename(path))[0] for path in glob.glob(os.path.join(image_dir, "*.jpg"))]
-        data = pd.DataFrame(data, columns=['ImageId'])
-        data['PredictionString'] = ''
-        
-        self.data = data
+        self.image_id_list = [os.path.splitext(os.path.basename(path))[0] for path in glob.glob(os.path.join(image_dir, "*.jpg"))]
         
         self.csv_path = csv_path
         self.image_dir = image_dir
@@ -113,7 +108,7 @@ class TestDataset(torch.utils.data.Dataset):
     def __getitem__(self, idx):
         R = self.R
         
-        image_id = self.data['ImageId'][idx]
+        image_id = self.image_id_list[idx]
     
         image_path = os.path.join(self.image_dir, image_id + '.jpg')
         image = cv2.imread(image_path)
@@ -131,7 +126,7 @@ class TestDataset(torch.utils.data.Dataset):
         return image, image_id
                     
     def __len__(self):
-        return len(self.data)
+        return len(self.image_id_list)
             
 if __name__ == '__main__':
     import numpy as np

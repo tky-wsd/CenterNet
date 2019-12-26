@@ -10,8 +10,7 @@ import torch.nn as nn
 from dataset import TestDataset
 from driver import Evaluater
 from unet import StackedUNet
-from head_net import HeatmapNet, ObjectSizeNet, DepthNet
-from criterion import StackedHeatmapLoss, StackedDepthLoss
+from head_net import HeatmapNet, ObjectSizeNet, DepthNet, YawNet, PitchNet, RollNet
 
 EPS=1e-8
 
@@ -32,6 +31,9 @@ parser.add_argument('--heatmap', type=float, default=None, help='Weight for heat
 parser.add_argument('--local_offset', type=float, default=None, help='Weight for local_offset')
 parser.add_argument('--object_size', type=float, default=None, help='Weight for object_size')
 parser.add_argument('--depth', type=float, default=None, help='Weight for depth')
+parser.add_argument('--yaw', type=float, default=None, help='Weight for yaw')
+parser.add_argument('--pitch', type=float, default=None, help='Weight for pitch')
+parser.add_argument('--roll', type=float, default=None, help='Weight for roll')
 
 parser.add_argument('--out_image_dir', type=str, default='tmp', help='Directory to save images')
 parser.add_argument('--model_path', type=str, default='tmp', help='Path to model')
@@ -68,6 +70,15 @@ def main(args):
     if args.depth is not None and args.depth > 0:
         num_out_features = 1
         head_list.append(('depth', output_bottleneck_channels, DepthNet(output_bottleneck_channels, num_out_features)))
+    if args.yaw is not None and args.yaw > 0:
+        num_out_features = 1
+        head_list.append(('yaw', output_bottleneck_channels, YawNet(output_bottleneck_channels, num_out_features)))
+    if args.pitch is not None and args.pitch > 0:
+        num_out_features = 2
+        head_list.append(('pitch', output_bottleneck_channels, PitchNet(output_bottleneck_channels, num_out_features)))
+    if args.roll is not None and args.roll > 0:
+        num_out_features = 1
+        head_list.append(('roll', output_bottleneck_channels, RollNet(output_bottleneck_channels, num_out_features)))
     
     model = StackedUNet(head_list, num_stacks=args.S, in_channels=3, channel_list=args.C, hidden_channel=args.H)
      
