@@ -1,10 +1,11 @@
 import os
+import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
-from utils import show_heatmap, show_image, get_keypoints
+from utils import show_heatmap, show_image, get_keypoints, get_inv_camera_matrix
 
 class Trainer(object):
     def __init__(self, data_loader, model, optimizer, head_list, criterions, lambdas, args):
@@ -83,11 +84,11 @@ class Trainer(object):
 
             print("loss: {}".format(loss.item()))
             
-            total_loss = total_loss + loss.detach().item()
-            
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+            
+            total_loss = total_loss + loss.detach().item()
             
         for (head, num_out_features, head_module) in head_list:
             self.train_loss[head][epoch] = self.train_loss[head][epoch] / len(self.train_loader)
@@ -135,15 +136,18 @@ class Evaluater(object):
         self.model = model
         
         self.head_list = head_list
+        self.inv_camera_matrix = get_inv_camera_matrix(data_loader.camera_matrix)
         
         self.data_frame = pd.DataFrame(columns=['ImageId', 'PredictionString'])
         
         self.out_image_dir = args.out_image_dir
         os.makedirs(self.out_image_dir, exist_ok=True)
         
+        
     def eval(self):
         batch_size = self.data_loader.batch_size
         head_list = self.head_list
+        R = self.data_loader.R
         
         self.model.eval()
         
@@ -160,22 +164,43 @@ class Evaluater(object):
                         else:
                             estimated_output[head] = torch.cat((estimated_output[head], output[head].unsqueeze(dim=0)), dim=0)
 
-                for (head, num_out_features, head_module) in head_list:
-                    for batch_id in range(batch_size):
-                        if head == 'heatmap':
-                            heatmap = estimated_output[head][-1][batch_id, 0].clone().cpu()
-                            heatmap_path = os.path.join(self.out_image_dir, image_id[batch_id] + '_heatmap.png')
-                            show_heatmap(heatmap, save_path=heatmap_path)
+                for batch_id in range(batch_size):
+                    keypoint_list = []
+                    
+                    heatmap = estimated_output['heatmap'][-1][batch_id, 0].clone().cpu()
+                    heatmap_path = os.path.join(self.out_image_dir, image_id[batch_id] + '_heatmap.png')
+                    show_heatmap(heatmap, save_path=heatmap_path)
+                    
+                    keypoint_map = get_keypoints(heatmap)
+                    keypoint_map_path = os.path.join(self.out_image_dir, image_id[batch_id] + '_keypoint.png')
+                    show_heatmap(keypoint_map, save_path=keypoint_map_path)
+                    
+                    for row_id, keypoint_map_row in enumerate(keypoint_map):
+                        for column_id, keypoint_map_pixel in enumerate(keypoint_map_row):
+                            if keypoint_map[row_id, column_id] > 0.0:
+                                keypoint_list.append((row_id, column_id))
+                    
+                    test_image = test_images[batch_id].clone().cpu().permute(1, 2, 0)
+                    image_path = save_path = os.path.join(self.out_image_dir, image_id[batch_id] + '.png')
+                    show_image(test_image, save_path=image_path)
+                        
+                    for row_id, column_id in keypoint_list:
+                        depth_map = estimated_output['depth'][-1][batch_id, 0].clone().cpu()
+                        estimated_depth = depth_map[row_id, column_id]
+                        x_image, y_image = float(row_id*R)*estimated_depth, float(column_id*R)*estimated_depth
+                        image_coords = np.array([x_image, y_image, estimated_depth])
+                        camera_coords = np.dot(self.inv_camera_matrix, image_coords.T).T
+                        confidence = heatmap[row_id, column_id]
+                        
+                        # TODO: Predict yaw pitch roll
+                        prediction = (0.18, 0.0, 3.14159, camera_coords[0], camera_coords[1], camera_coords[2], confidence) # yaw, pitch, roll, x, y, z,confidence
+                        prediction_string.append(prediction)
+                        
+                    prediction_string = [str(prediction) for prediction in prediction_string]
+                    prediction_string = prediction_string.replace('(', '').replace(')', '').replace(',', '')
+                    prediction_string = ' '.join(prediction_string)
                             
-                            keypoint_map = get_keypoints(heatmap)
-                            keypoint_map_path = os.path.join(self.out_image_dir, image_id[batch_id] + '_keypoint.png')
-                            show_heatmap(keypoint_map, save_path=keypoint_map_path)
-                            
-                            test_image = test_images[batch_id].clone().cpu().permute(1, 2, 0)
-                            image_path = save_path = os.path.join(self.out_image_dir, image_id[batch_id] + '.png')
-                            show_image(test_image, save_path=image_path)
-                            
-                # data = pd.DataFrame([(image_id, prediction_string)], columns=['ImageId', 'PredictionString'])
-                # self.data_frame = self.data_frame.append((image_id, prediction_string))
+                    data = pd.DataFrame([(image_id[batch_id], prediction_string)], columns=['ImageId', 'PredictionString'])
+                    self.data_frame = self.data_frame.append(data)
                         
                 return

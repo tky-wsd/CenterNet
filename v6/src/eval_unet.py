@@ -86,7 +86,7 @@ def main(args):
     print(model)
     
     if torch.cuda.is_available():
-        model = torch.nn.DataParallel(model)
+        model = nn.DataParallel(model)
         model.cuda()
         
     package = torch.load(args.model_path)

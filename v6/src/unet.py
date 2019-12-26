@@ -45,7 +45,7 @@ class UNet(nn.Module):
         head_net = []
         
         if potential_map:
-            potential_map_channel = 3
+            potential_map_channel = 2
         else:
             potential_map_channel = 0
         
@@ -74,17 +74,16 @@ class UNet(nn.Module):
         output = x
         
         if self.potential_map:
-            potential_h = torch.linspace(start=0.0, end=1.0, steps=H_original).view(1, 1, H_original, 1)
-            potential_w = torch.linspace(start=0.0, end=1.0, steps=W_original).view(1, 1, 1, W_original)
-            potential_h = potential_h.expand(batch_size, -1, -1, W_original)
-            potential_w = potential_w.expand(batch_size, -1, H_original, -1)
-            potential_hw = potential_h * potential_w
+            potential_h, potential_w = torch.meshgrid([torch.linspace(start=0.0, end=1.0, steps=H_original), torch.linspace(start=0.0, end=1.0, steps=W_original)])
+            potential_h = potential_h.unsqueeze(dim=0)
+            potential_w = potential_w.unsqueeze(dim=0)
+            potential_h = potential_h.expand(batch_size, -1, -1, -1).detach()
+            potential_w = potential_w.expand(batch_size, -1, -1, -1).detach()
             
             potential_h = potential_h.to(x.device)
             potential_w = potential_w.to(x.device)
-            potential_hw = potential_hw.to(x.device)
             
-            x = torch.cat((x, potential_h, potential_w, potential_hw), dim=1)
+            x = torch.cat((x, potential_h, potential_w), dim=1)
     
         output_intermediate = {}
         

@@ -115,7 +115,7 @@ def main(args):
     print(model)
     
     if torch.cuda.is_available():
-        model = torch.nn.DataParallel(model)
+        model = nn.DataParallel(model)
         model.cuda()
         
     if args.optimizer == 'Adam':
