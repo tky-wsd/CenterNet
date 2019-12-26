@@ -25,9 +25,11 @@ batch_size=4
 model_dir="${out_dir}/UNet_S${S}_C${C}_H${H}_heatmap${heatmap}_local_offset${local_offset}_depth${depth}_potential_map${potential_map}"
 model_path="${model_dir}/epoch${end_epoch}.pth"
 out_image_dir="${model_dir}/epoch${end_epoch}"
+out_csv_path="${out_image_dir}/test.csv"
 
 eval_unet.py \
 --test_csv_path ${test_csv_path} \
+--out_csv_path ${out_csv_path} \
 --test_image_dir ${test_image_dir} \
 --f_x 2304.5479 \
 --f_y 2305.8757 \
