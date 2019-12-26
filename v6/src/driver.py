@@ -207,4 +207,4 @@ class Evaluater(object):
                         
                 break
             
-            self.data_frame.to_csv(self.out_csv_path)
+            self.data_frame.to_csv(self.out_csv_path, index=False)
