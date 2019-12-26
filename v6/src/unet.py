@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from head_net import HeatmapNet, DepthNet
 
 class StackedUNet(nn.Module):
-    def __init__(self, head_list, num_stacks, in_channels, channel_list, hidden_channel=256):
+    def __init__(self, head_list, num_stacks, in_channels, channel_list, hidden_channel=256, potential_map=False):
         super(StackedUNet, self).__init__()
         
         self.num_stacks = num_stacks
@@ -14,7 +14,7 @@ class StackedUNet(nn.Module):
         
         net = []
         for idx in range(num_stacks):
-            net.append(UNet(head_list, channel_list, hidden_channel=hidden_channel))
+            net.append(UNet(head_list, channel_list, hidden_channel=hidden_channel, potential_map=potential_map))
             
         self.net = nn.Sequential(*net)
         
@@ -30,10 +30,11 @@ class StackedUNet(nn.Module):
         return outputs
 
 class UNet(nn.Module):
-    def __init__(self, head_list, channel_list, hidden_channel=256):
+    def __init__(self, head_list, channel_list, hidden_channel=256, potential_map=False):
         super(UNet, self).__init__()
         
         self.head_list = head_list
+        self.potential_map = potential_map
         
         self.encoder = Encoder(channel_list)
         self.bottleneck_conv2d = nn.Conv2d(channel_list[-1], channel_list[-1], kernel_size=(1,1), stride=(1,1))
@@ -43,9 +44,15 @@ class UNet(nn.Module):
         bottleneck_conv2d_intermediate = []
         head_net = []
         
+        if potential_map:
+            potential_map_channel = 3
+        else:
+            potential_map_channel = 0
+        
         for head, num_in_features, head_module in head_list:
-            bottleneck_conv2d_intermediate.append(nn.Conv2d(channel_list[0], num_in_features, kernel_size=(1,1), stride=(1,1)))
+            bottleneck_conv2d_intermediate.append(nn.Conv2d(channel_list[0]+potential_map_channel, num_in_features, kernel_size=(1,1), stride=(1,1)))
             head_net.append(head_module)
+        
         
         self.bottleneck_conv2d_intermediate = nn.ModuleList(bottleneck_conv2d_intermediate)
         self.head_net = nn.ModuleList(head_net)
@@ -56,7 +63,7 @@ class UNet(nn.Module):
         x = self.bottleneck_conv2d(x)
         x = self.decoder(x, skips)
         
-        _, _, H_original, W_original = residual.size()
+        batch_size, _, H_original, W_original = residual.size()
         _, _, H, W = x.size()
         H_pad_left, W_pad_left = (H_original-H)//2, (W_original-W)//2
         H_pad_right, W_pad_right = H_original-H-H_pad_left, W_original-W-W_pad_left
@@ -65,6 +72,19 @@ class UNet(nn.Module):
         x = x + residual
         x = self.point_wise_conv2d(x)
         output = x
+        
+        if self.potential_map:
+            potential_h = torch.linspace(start=0.0, end=1.0, steps=H_original).view(1, 1, H_original, 1)
+            potential_w = torch.linspace(start=0.0, end=1.0, steps=W_original).view(1, 1, 1, W_original)
+            potential_h = potential_h.expand(batch_size, -1, -1, W_original)
+            potential_w = potential_w.expand(batch_size, -1, H_original, -1)
+            potential_hw = potential_h * potential_w
+            
+            potential_h = potential_h.to(x.device)
+            potential_w = potential_w.to(x.device)
+            potential_hw = potential_hw.to(x.device)
+            
+            x = torch.cat((x, potential_h, potential_w, potential_hw), dim=1)
     
         output_intermediate = {}
         

@@ -30,6 +30,7 @@ parser.add_argument('--width', type=int, default=None, help='Image width (pixel)
 parser.add_argument('--S', type=int, default=3, help='Number of hourglass stacks')
 parser.add_argument('--C', type=str, default='[64,128,128,256,256,512]', help='Number of channels')
 parser.add_argument('--H', type=int, default=256, help='Number of output bottleneck channels')
+parser.add_argument('--potential_map', type=int, default=0, help='Whether to use potential map')
 parser.add_argument('--batch_size', type=int, default=4, help='Batch size')
 parser.add_argument('--heatmap', type=float, default=None, help='Weight for heatmap')
 parser.add_argument('--local_offset', type=float, default=None, help='Weight for local_offset')
@@ -110,7 +111,7 @@ def main(args):
         lambdas['roll'] = args.roll
         criterions['roll'] = StackedRollLoss()
 
-    model = StackedUNet(head_list, num_stacks=args.S, in_channels=3, channel_list=args.C, hidden_channel=args.H)
+    model = StackedUNet(head_list, num_stacks=args.S, in_channels=3, channel_list=args.C, hidden_channel=args.H, potential_map=args.potential_map)
     print(model)
     
     if torch.cuda.is_available():
