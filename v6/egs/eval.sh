@@ -6,7 +6,7 @@ end_epoch=$3
 
 . ./path.sh
 
-test_csv_path="${DATA_DIR}/test.csv"
+test_csv_path="${DATA_DIR}/sample_submission.csv"
 test_image_dir="${DATA_DIR}/test_images"
 
 # Network configuration
