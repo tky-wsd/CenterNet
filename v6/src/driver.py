@@ -135,6 +135,7 @@ class Evaluater(object):
         self.data_loader = data_loader['test']
         self.model = model
         
+        self.R = args.R
         self.head_list = head_list
         self.inv_camera_matrix = get_inv_camera_matrix(args.camera_matrix)
         
@@ -147,7 +148,7 @@ class Evaluater(object):
     def eval(self):
         batch_size = self.data_loader.batch_size
         head_list = self.head_list
-        R = self.data_loader.R
+        R = self.R
         
         self.model.eval()
         

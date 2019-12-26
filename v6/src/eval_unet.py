@@ -42,6 +42,7 @@ parser.add_argument('--model_path', type=str, default='tmp', help='Path to model
 
 def main(args):
     R = 4 # resolution
+    args.R = R
     C = args.C.replace('[', '').replace(']', '').split(',')
     args.C = [int(channel) for channel in C]
     output_bottleneck_channels = args.H
