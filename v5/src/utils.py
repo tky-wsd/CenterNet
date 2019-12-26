@@ -73,7 +73,7 @@ def get_keypoints(heatmap, threshold=0.6):
         
     """
     if threshold < 0.5:
-        raise ValueError("Parametes threshold must be grater than 0.5.")
+        # raise ValueError("Parametes threshold must be grater than 0.5.")
     H, W = heatmap.size()
     
     mask = heatmap // threshold
