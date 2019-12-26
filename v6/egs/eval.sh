@@ -36,6 +36,7 @@ eval_unet.py \
 --S $S \
 --C $C \
 --H $H \
+--potential_map ${potential_map} \
 --batch_size ${batch_size} \
 --heatmap ${heatmap} \
 --local_offset ${local_offset} \
