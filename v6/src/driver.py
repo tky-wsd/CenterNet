@@ -136,7 +136,7 @@ class Evaluater(object):
         self.model = model
         
         self.head_list = head_list
-        self.inv_camera_matrix = get_inv_camera_matrix(data_loader.camera_matrix)
+        self.inv_camera_matrix = get_inv_camera_matrix(args.camera_matrix)
         
         self.data_frame = pd.DataFrame(columns=['ImageId', 'PredictionString'])
         

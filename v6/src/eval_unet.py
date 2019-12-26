@@ -51,6 +51,7 @@ def main(args):
         [0, args.f_y, args.c_y],
         [0, 0, 1]
     ])
+    args.camera_matrix = camera_matrix
     
     dataset = TestDataset(csv_path=args.test_csv_path, image_dir=args.test_image_dir, R=R, camera_matrix=camera_matrix)
     data_loader = {}
