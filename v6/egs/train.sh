@@ -3,7 +3,7 @@
 DATA_DIR=$1
 out_dir=$2
 epochs=$3
-continue_from=$4
+continue_epoch=$4
 
 . ./path.sh
 
@@ -13,22 +13,22 @@ train_image_dir="${DATA_DIR}/train_images"
 
 S=1
 C=[64,64,128,128,256,512]
-H=256
+H=128
 heatmap=1.0
 local_offset=0.0
 depth=1.0
 yaw=0.0
 pitch=0.0
 roll=0.0
-potential_map=0
+potential_map=1
 batch_size=4
 
-if [ -z ${continue_from} ]; then
+if [ -z ${continue_epoch} ]; then
     argument=model_dir
     model_option="${out_dir}/UNet_S${S}_C${C}_H${H}_heatmap${heatmap}_local_offset${local_offset}_depth${depth}_potential_map${potential_map}"
 else
     argument=continue_from
-    model_option=${continue_from}
+    model_option="${out_dir}/UNet_S${S}_C${C}_H${H}_heatmap${heatmap}_local_offset${local_offset}_depth${depth}_potential_map${potential_map}/epoch${epoch}.pth"
 fi
 
 train_unet.py \
