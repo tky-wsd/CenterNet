@@ -13,7 +13,7 @@ train_image_dir="${DATA_DIR}/train_images"
 
 S=1
 C=[64,64,128,128,128,256]
-H=128
+H=256
 heatmap=1.0
 local_offset=0.0
 depth=0.0
