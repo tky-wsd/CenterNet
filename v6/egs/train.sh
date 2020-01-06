@@ -12,11 +12,11 @@ valid_csv_path="${DATA_DIR}/valid.csv"
 train_image_dir="${DATA_DIR}/train_images"
 
 S=1
-C=[64,64,128,128,256,512]
+C=[64,64,128,128,128,256]
 H=128
 heatmap=1.0
 local_offset=0.0
-depth=1.0
+depth=0.0
 yaw=0.0
 pitch=0.0
 roll=0.0
